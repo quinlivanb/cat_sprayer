@@ -1,0 +1,49 @@
+import cv2
+import os
+
+
+# if not running on Raspberry pi
+demo_mode = True                                # demo mode only sends video, no sprayer control available
+
+# algorithm settings
+cat_index = 16                                  # logit index corresponding to cat class
+model_loc = 'model_files/detect.tflite'         # location of quantized tflite model
+min_conf_threshold = 0.25                       # confidence level threshold
+detection_ratio = 0.5                           # how ful detection buffer must be to trigger event
+
+# buffer setup
+expected_fps = 10                               # starting point for dynamic fps buffers
+detection_dur = 1                               # buffer length in seconds
+video_dur = 12                                   # duration (seconds) of output video
+fps_dur = 10                                    # buffer length in seconds
+
+# spray_control
+on_press_duration = 2.5                         # how long (seconds) to press button when turning on sprayer
+off_press_duration = 0.5                        # how long (seconds) to press button when turning off sprayer
+spray_duration = 3                              # how long (seconds) to spray the cat
+pi_pin = 18                                     # control pin os raspberry pi
+
+# sending clips
+bucket_name = 'cat-spray-clips'                 # s3 bucket to stores clips
+use_whatsapp = True                             # send to whatsapp or stanard mms
+if use_whatsapp:
+    mms_target = os.getenv('WHATSAPP_TARGET')
+    mms_source = os.getenv('WHATSAPP_SOURCE')
+else:
+    mms_target = os.getenv('MMS_TARGET')
+    mms_source = os.getenv('MMS_SOURCE')
+
+mms_text = "The cat is at it again..."
+mms_text_media_fail = "The cat is at it again... " \
+                      "but there was an issue with the media upload"
+url_duration = 600
+
+# camera control
+cam_number = 0                                  # index of camera
+cam_warm_up = 1                                 # time (seconds) for camera sensor to 'warm up'
+video_out = 'video_out/cat_clip_'               # where to store latest event video
+codec = cv2.VideoWriter_fourcc(*'mp4v')         # video codec used by cv2
+clip_ext = '.mp4'                               # base name for all video files
+event_lead = -2                                 # when should clip start, relative to event detection
+content_type = 'video/mp4'                      # url content type
+
