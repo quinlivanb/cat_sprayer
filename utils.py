@@ -2,8 +2,11 @@ from collections import deque
 import time
 from datetime import datetime
 import os
+import subprocess
+import shutil
 import numpy as np
 import cv2
+from PIL import ImageFont, ImageDraw, Image
 from twilio.rest import Client
 from twilio.base.exceptions import TwilioRestException
 import boto3
@@ -26,10 +29,8 @@ class SprayController:
         GPIO.output(self.target_pin, GPIO.HIGH)
         time.sleep(config.on_press_duration)
         GPIO.output(self.target_pin, GPIO.LOW)
-
         # spray the cat for 3 seconds
         time.sleep(self.spray_duration)
-
         # turn off the sprayer
         GPIO.output(self.target_pin, GPIO.HIGH)
         time.sleep(config.off_press_duration)
@@ -63,6 +64,7 @@ class SendClip:
     def send_mms(self, file_name):
         # create media url using s3 pre-signed url
         media = self.generate_url(file_name)
+
         # send message using twilio
         self.send_twilio(media)
 
@@ -99,6 +101,10 @@ class ImageWrangler:
         time.sleep(config.cam_warm_up)
         self.input_dims = input_dims
         self.send_clip = SendClip()
+        self.temp_video_dir = config.video_out
+        # create temp folder, will be deleted at tear down
+        if not os.path.exists(self.temp_video_dir.split('/')[0]):
+            os.mkdir(self.temp_video_dir.split('/')[0])
 
     def collect_frame(self):
         # Capture latest available frame
@@ -112,16 +118,15 @@ class ImageWrangler:
         return np_data, frame
 
     def store_clip(self, frames, fps):
-        # todo set image dimentions as config
         (h, w) = frames[0].shape[:2]
 
         # reduce resolution for mms due to 3MB data restriction
         if not config.use_whatsapp:
             h = int(h/2)
-            w = int(h / 2)
+            w = int(w/2)
 
-        temp_file = config.video_out + datetime.now().strftime("%d_%m_%Y_%H_%M_%S") + config.clip_ext
-        output_clip = config.video_out + datetime.now().strftime("%d_%m_%Y_%H_%M_%S") + '_2' + config.clip_ext
+        temp_file = self.temp_video_dir + datetime.now().strftime("%d_%m_%Y_%H_%M_%S") + '_temp' + config.clip_ext
+        output_clip = self.temp_video_dir + datetime.now().strftime("%d_%m_%Y_%H_%M_%S") + config.clip_ext
 
         out = cv2.VideoWriter(temp_file, config.codec, fps, (w, h))
         for frame in frames:
@@ -129,18 +134,45 @@ class ImageWrangler:
         out.release()
 
         # slight hack to covert file to h264, also need to add silent audio track to keep whatsapp happy!!
-        os.system("ffmpeg -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=44100"
-                  " -i %s -c:v libx264 -c:a aac -shortest %s" % (temp_file, output_clip))
+        fnull = open(os.devnull, 'w')
+        subprocess.run(("ffmpeg -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=44100"
+                       " -i %s -c:v libx264 -c:a aac -shortest %s" % (temp_file, output_clip)).split(' '),
+                       stdout=fnull, stderr=subprocess.STDOUT)
 
         self.send_clip.send_mms(output_clip)
 
         # delete local files when no longer needed - not much space on the pi!
-        os.remove(temp_file)
-        os.remove(output_clip)
+        self.delete_file(temp_file)
+        self.delete_file(output_clip)
+
+    @staticmethod
+    def draw_text(frame, event_time, sprayer_thread):
+
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)                  # Convert the image to RGB (OpenCV uses BGR)
+        frame_pil = Image.fromarray(frame_rgb)                              # Pass the image to PIL
+        draw = ImageDraw.Draw(frame_pil)
+        font = ImageFont.truetype(config.font, config.text_size)            # setup font
+
+        dots = int((time.time() - event_time)/2)
+        draw.text((50, frame.shape[0] - 50), 'Preparing video for transmission.' + '.' * dots,
+                  font=font, fill=config.green)
+
+        if sprayer_thread:
+            draw.text((50, 50), 'Cat detected!', font=font, fill=config.red)
+            draw.text((50, 100), 'Activating cat deterrent devices', font=font, fill=config.green)
+
+        return cv2.cvtColor(np.array(frame_pil), cv2.COLOR_RGB2BGR)
+
+    @staticmethod
+    def delete_file(file_name):
+        if os.path.exists(file_name):
+            os.remove(file_name)
 
     def tear_down(self):
         self.capture.release()
         cv2.destroyAllWindows()
+        # delete temp folder and any remaining videos
+        shutil.rmtree(self.temp_video_dir.split('/')[0])
 
 
 # basically just deque but you can redefine the man len, if size is reduced, data is removed from the left

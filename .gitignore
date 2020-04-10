@@ -10,6 +10,7 @@ __pycache__/
 
 # project specific
 env_setup
+model_files/
 
 # Distribution / packaging
 .Python

@@ -14,7 +14,7 @@ detection_ratio = 0.5                           # how ful detection buffer must 
 # buffer setup
 expected_fps = 10                               # starting point for dynamic fps buffers
 detection_dur = 1                               # buffer length in seconds
-video_dur = 12                                   # duration (seconds) of output video
+video_dur = 12                                  # duration (seconds) of output video
 fps_dur = 10                                    # buffer length in seconds
 
 # spray_control
@@ -24,8 +24,9 @@ spray_duration = 3                              # how long (seconds) to spray th
 pi_pin = 18                                     # control pin os raspberry pi
 
 # sending clips
+send_clip = True
 bucket_name = 'cat-spray-clips'                 # s3 bucket to stores clips
-use_whatsapp = True                             # send to whatsapp or stanard mms
+use_whatsapp = False                            # send to whatsapp or stanard mms
 if use_whatsapp:
     mms_target = os.getenv('WHATSAPP_TARGET')
     mms_source = os.getenv('WHATSAPP_SOURCE')
@@ -47,3 +48,10 @@ clip_ext = '.mp4'                               # base name for all video files
 event_lead = -2                                 # when should clip start, relative to event detection
 content_type = 'video/mp4'                      # url content type
 
+
+# video text
+add_text = True
+font = "fonts/UniVGA16.ttf"
+text_size = 40
+green = (0, 255, 43)
+red = (217, 33, 33)

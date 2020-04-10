@@ -1,4 +1,5 @@
 from threading import Thread
+import time
 from tflite_runtime.interpreter import Interpreter
 import numpy as np
 import cv2
@@ -13,12 +14,8 @@ def main():
     else:
         controller = SprayController(config.pi_pin, config.spray_duration)
 
-    cat_index = config.cat_index                                # output logit index corresponding to cat class
-    min_conf_threshold = config.min_conf_threshold              # confidence level threshold
-
     # load model from disc
-    model_path = config.model_loc
-    interpreter = Interpreter(model_path=model_path)
+    interpreter = Interpreter(model_path=config.model_loc)
     interpreter.allocate_tensors()
 
     # get input/output details
@@ -30,33 +27,24 @@ def main():
     # set up the video capture using open cv
     image_capture = ImageWrangler((width, height), cam_number=0)
 
-    # set up buffer control
-    expected_fps = config.expected_fps
-
     # initialize variable length fixed duration fifos
-    variable_fifo = VariableFifo(initial_fps=expected_fps)
+    variable_fifo = VariableFifo(initial_fps=config.expected_fps)
     detection_buffer = variable_fifo.initialize_buffers(False, config.detection_dur)
     frame_buffer = variable_fifo.initialize_buffers(None, config.video_dur)
-    fps_buffer = variable_fifo.initialize_buffers(expected_fps, config.fps_dur)
-
-    # flag and counter are used to ensure we only launch one thread per event
-    event_frame_cnt = 0
-    on_going_event = False
-
-    # how full should the detection buffer be to trigger an event?
-    detection_ratio = config.detection_ratio
+    fps_buffer = variable_fifo.initialize_buffers(config.expected_fps, config.fps_dur)
 
     # frame_rate_buffer
     freq = cv2.getTickFrequency()
-    cur_fpr = prev_fps = expected_fps
+    cur_fpr = prev_fps = config.expected_fps
 
     # how many frames to wait before storing video buffer to disk
     capture_delay = max(1, frame_buffer.maxlen + (config.event_lead * cur_fpr))
 
-    # initialize required flags
+    # initialize required loop variables
     sprayer_thread = None
-    video_thread = None
-    recording = False
+    event_frame_cnt = 0
+    on_going_event = False
+    cur_event_start = 0
 
     while True:
 
@@ -77,14 +65,15 @@ def main():
         scores = interpreter.get_tensor(output_details[2]['index'])[0]  # Confidence of detected objects
 
         # was any cat observed in the current frame
-        cat_detected = np.sum((classes == cat_index) & (scores > min_conf_threshold)) > 0
+        cat_detected = np.sum((classes == config.cat_index) & (scores > config.min_conf_threshold)) > 0
 
         # has the number of cat detections in the last n frames exceeded the detection ratio ratio?
-        event_detected = sum(detection_buffer) / detection_buffer.maxlen > detection_ratio
+        event_detected = sum(detection_buffer) / detection_buffer.maxlen > config.detection_ratio
 
         # start new event unless one on-going
         if event_detected and not on_going_event:
             on_going_event = True
+            cur_event_start = time.time()
 
             # launch tread to control sprayer without blocking video capture
             sprayer_thread = Thread(target=controller.spray_the_cat)
@@ -95,25 +84,17 @@ def main():
             # cnt down timer
             event_frame_cnt += 1
 
-            cv2.putText(cur_frame, 'Transmitting video in t-minus %i seconds' %
-                        ((capture_delay - event_frame_cnt) / expected_fps),
-                        (50, 300), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 5)
-
-            if sprayer_thread.is_alive():
-                cv2.putText(cur_frame, 'Cat detected!', (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 5)
-                cv2.putText(cur_frame, 'Activating cat deterrent devices',
-                            (50, 200), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 5)
+            # add test to current frame
+            if config.add_text:
+                cur_frame = image_capture.draw_text(cur_frame, cur_event_start, sprayer_thread.is_alive())
 
             if event_frame_cnt >= capture_delay:
                 on_going_event = False
                 event_frame_cnt = 0
                 # launch tread to store latest video clip
-                video_thread = Thread(target=image_capture.store_clip, args=(frame_buffer.copy(), cur_fps,))
-                video_thread.start()
-                recording = True
-
-        if recording and video_thread.is_alive():
-            recording = False
+                if config.send_clip:
+                    video_thread = Thread(target=image_capture.store_clip, args=(frame_buffer.copy(), cur_fps,))
+                    video_thread.start()
 
         # Display frame for demo mode
         if config.demo_mode:
@@ -128,9 +109,9 @@ def main():
         fps_buffer.appendleft(fps)  # update fps buffer
         detection_buffer.append(cat_detected)  # update event detection buffer
 
-        # dynamically resize buffers to match current variable fps - ensure predicable algo behaviour on any device
+        # dynamically resize buffers to match current variable fps - ensure predicable algo behaviour at any fps
         # don't update after event detection until video capture is complete
-        if cur_fps != prev_fps and not recording:
+        if cur_fps != prev_fps:
             detection_buffer = variable_fifo.dynamic_buffer_update(config.detection_dur, detection_buffer, cur_fps)
             frame_buffer = variable_fifo.dynamic_buffer_update(config.video_dur, frame_buffer, cur_fps)
             fps_buffer = variable_fifo.dynamic_buffer_update(config.fps_dur, fps_buffer, cur_fps)
