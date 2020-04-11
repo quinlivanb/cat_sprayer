@@ -9,10 +9,10 @@ from utils import ImageWrangler, VariableFifo, SprayController, MockController
 
 def main():
     # initialize sprayer control
-    if config.demo_mode:
-        controller = MockController()
-    else:
+    if config.on_pi:
         controller = SprayController(config.pi_pin, config.spray_duration)
+    else:
+        controller = MockController()
 
     # load model from disc
     interpreter = Interpreter(model_path=config.model_loc)
@@ -97,8 +97,10 @@ def main():
                     video_thread.start()
 
         # Display frame for demo mode
-        if config.demo_mode:
+        if config.show_vid and not config.on_pi:
             cv2.imshow('Object detector', cur_frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
         # Calculate framerate
         t2 = cv2.getTickCount()
@@ -119,9 +121,6 @@ def main():
             capture_delay = max(1, frame_buffer.maxlen + (config.event_lead * cur_fpr))
             # update prev_fps
             prev_fps = cur_fps
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
 
     # When everything done, release the capture and clean up the controller
     image_capture.tear_down()

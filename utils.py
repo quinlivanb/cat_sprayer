@@ -13,7 +13,7 @@ import boto3
 from botocore.exceptions import ClientError
 import config
 
-if not config.demo_mode:
+if config.on_pi:
     import RPi.GPIO as GPIO
 
 

@@ -3,7 +3,8 @@ import os
 
 
 # if not running on Raspberry pi
-demo_mode = True                                # demo mode only sends video, no sprayer control available
+on_pi = False                                   # demo mode only sends video, no sprayer control available
+show_vid = False
 
 # algorithm settings
 cat_index = 16                                  # logit index corresponding to cat class
