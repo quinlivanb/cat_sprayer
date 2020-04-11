@@ -13,7 +13,11 @@ min_conf_threshold = 0.25                       # confidence level threshold
 detection_ratio = 0.5                           # how ful detection buffer must be to trigger event
 
 # buffer setup
-expected_fps = 10                               # starting point for dynamic fps buffers
+if on_pi:
+    expected_fps = 4                            # starting point for dynamic fps buffers
+else:
+    expected_fps = 10                           # starting point for dynamic fps buffers
+
 detection_dur = 1                               # buffer length in seconds
 video_dur = 12                                  # duration (seconds) of output video
 fps_dur = 10                                    # buffer length in seconds
