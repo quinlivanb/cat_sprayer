@@ -98,8 +98,8 @@ class SendClip:
 class ImageWrangler:
     def __init__(self, input_dims, cam_number=config.cam_number):
         self.capture = cv2.VideoCapture(cam_number)
-        self.capture.set(3, 1280)
-        self.capture.set(4, 960)
+        self.capture.set(3, config.resolution[0])
+        self.capture.set(4, config.resolution[1])
         time.sleep(config.cam_warm_up)
         self.input_dims = input_dims
         self.send_clip = SendClip()
@@ -120,12 +120,7 @@ class ImageWrangler:
         return np_data, frame
 
     def store_clip(self, frames, fps):
-        (h, w) = frames[0].shape[:2]
-
-        # reduce resolution for mms due to 3MB data restriction
-        if not config.use_whatsapp:
-            h = int(h/2)
-            w = int(w/2)
+        (h, w) = reversed(config.resolution)
 
         temp_file = self.temp_video_dir + datetime.now().strftime("%d_%m_%Y_%H_%M_%S") + '_temp' + config.clip_ext
         output_clip = self.temp_video_dir + datetime.now().strftime("%d_%m_%Y_%H_%M_%S") + config.clip_ext

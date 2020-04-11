@@ -41,6 +41,7 @@ mms_text_media_fail = "The cat is at it again... " \
 url_duration = 600
 
 # camera control
+resolution = (640, 360)
 cam_number = 0                                  # index of camera
 cam_warm_up = 1                                 # time (seconds) for camera sensor to 'warm up'
 video_out = 'video_out/cat_clip_'               # where to store latest event video
