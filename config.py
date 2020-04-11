@@ -3,7 +3,7 @@ import os
 
 
 # if not running on Raspberry pi
-on_pi = False                                   # demo mode only sends video, no sprayer control available
+on_pi = True                                    # demo mode only sends video, no sprayer control available
 show_vid = False
 
 # algorithm settings
