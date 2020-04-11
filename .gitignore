@@ -9,7 +9,7 @@ __pycache__/
 *.so
 
 # project specific
-env_setup
+env_setup_priv
 model_files/
 
 # Distribution / packaging
@@ -128,4 +128,3 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+
+export AWS_ACCESS_KEY_ID=<enter own value here>
+export AWS_SECRET_ACCESS_KEY=<enter own value here>
+export AWS_DEFAULT_REGION=<enter own value here>
+
+export TWILIO_ID=<enter own value here>
+export TWILIO_KEY=<enter own value here>
+
+export WHATSAPP_TARGET=<enter own value here>
+export WHATSAPP_SOURCE=<enter own value here>
+export MMS_TARGET=<enter own value here>
+export MMS_SOURCE=<enter own value here>
