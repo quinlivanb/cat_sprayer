@@ -7,25 +7,7 @@ import config
 from utils import ImageWrangler, VariableFifo, SprayController, MockController
 
 
-def main():
-    # initialize sprayer control
-    if config.on_pi:
-        controller = SprayController(config.pi_pin, config.spray_duration)
-    else:
-        controller = MockController()
-
-    # load model from disc
-    interpreter = Interpreter(model_path=config.model_loc)
-    interpreter.allocate_tensors()
-
-    # get input/output details
-    input_details = interpreter.get_input_details()
-    output_details = interpreter.get_output_details()
-    height = input_details[0]['shape'][1]
-    width = input_details[0]['shape'][2]
-
-    # set up the video capture using open cv
-    image_capture = ImageWrangler((width, height), cam_number=0)
+def main(controller, image_capture):
 
     # initialize variable length fixed duration fifos
     variable_fifo = VariableFifo(initial_fps=config.expected_fps)
@@ -122,10 +104,31 @@ def main():
             # update prev_fps
             prev_fps = cur_fps
 
-    # When everything done, release the capture and clean up the controller
-    image_capture.tear_down()
-    controller.tear_down()
-
 
 if __name__ == '__main__':
-    main()
+
+    # initialize sprayer control
+    if config.on_pi:
+        hardware_controller = SprayController(config.pi_pin, config.spray_duration)
+    else:
+        hardware_controller = MockController()
+
+    # load model from disc
+    interpreter = Interpreter(model_path=config.model_loc)
+    interpreter.allocate_tensors()
+
+    # get input/output details
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+    height = input_details[0]['shape'][1]
+    width = input_details[0]['shape'][2]
+
+    # set up the video capture using open cv
+    opencv_capture = ImageWrangler((width, height), cam_number=0)
+
+    try:
+        main(hardware_controller, opencv_capture)
+    except KeyboardInterrupt:
+        # When everything done, release the capture and clean up the controller
+        opencv_capture.tear_down()
+        hardware_controller.tear_down()
