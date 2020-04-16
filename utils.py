@@ -35,9 +35,9 @@ class SprayController:
         # turn off the sprayer
         GPIO.output(self.target_pin, GPIO.LOW)
 
-    @staticmethod
-    def tear_down():
-        GPIO.cleanup()
+    def tear_down(self):
+        # ensure target pin tied to low
+        GPIO.output(self.target_pin, GPIO.LOW)
 
 
 # this class is just used for demo mode
