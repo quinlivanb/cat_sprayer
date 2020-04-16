@@ -23,6 +23,7 @@ video_dur = 12                                  # duration (seconds) of output v
 fps_dur = 10                                    # buffer length in seconds
 
 # spray_control
+sprayer_engaged = False                         # trigger sprayer
 on_press_duration = 2.5                         # how long (seconds) to press button when turning on sprayer
 off_press_duration = 0.5                        # how long (seconds) to press button when turning off sprayer
 spray_duration = 1                              # how long (seconds) to spray the cat

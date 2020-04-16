@@ -54,6 +54,7 @@ def main(controller, image_capture, sql_interface):
 
         # start new event unless one on-going
         if event_detected and not on_going_event:
+            print('Event Detected')
             on_going_event = True
             cur_event_start = time.time()
 
@@ -61,8 +62,9 @@ def main(controller, image_capture, sql_interface):
             sql_interface.insert_event()
 
             # launch tread to control sprayer without blocking video capture
-            sprayer_thread = Thread(target=controller.spray_the_cat)
-            sprayer_thread.start()
+            if config.sprayer_engaged:
+                sprayer_thread = Thread(target=controller.spray_the_cat)
+                sprayer_thread.start()
 
         # during an event, we use a timer to collect to correct number of frames and write them to file
         if on_going_event:
