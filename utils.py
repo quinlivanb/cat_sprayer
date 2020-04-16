@@ -194,6 +194,7 @@ class VariableFifo:
 class SqlControl:
     def __init__(self):
         self.db_location = config.event_db
+        self.create_table()
 
     def create_connection(self):
         conn = None
