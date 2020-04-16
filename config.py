@@ -57,7 +57,7 @@ content_type = 'video/mp4'                      # url content type
 
 
 # video text
-add_text = True
+add_text = False
 font = "fonts/UniVGA16.ttf"
 text_size = 20
 green = (0, 255, 43)

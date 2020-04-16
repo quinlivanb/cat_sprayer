@@ -71,7 +71,7 @@ def main(controller, image_capture, sql_interface):
             # cnt down timer
             event_frame_cnt += 1
 
-            # add test to current frame
+            # add text to current frame
             if config.add_text:
                 cur_frame = image_capture.draw_text(cur_frame, cur_event_start, sprayer_thread.is_alive())
 
