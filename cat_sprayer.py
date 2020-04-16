@@ -118,6 +118,7 @@ if __name__ == '__main__':
 
     # SQL interface
     sql_interface = SqlControl()
+    sql_interface.create_table()
 
     # load model from disc
     interpreter = Interpreter(model_path=config.model_loc)
