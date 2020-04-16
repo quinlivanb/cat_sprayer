@@ -12,6 +12,9 @@ from twilio.base.exceptions import TwilioRestException
 import boto3
 from botocore.exceptions import ClientError
 import config
+import sqlite3
+from sqlite3 import Error
+
 
 if config.on_pi:
     import RPi.GPIO as GPIO
@@ -190,3 +193,35 @@ class VariableFifo:
         buffer_list = list(buffer)
         buffer = deque(buffer_list, cur_fps * duration)
         return buffer
+
+
+class SqlControl:
+    def __init__(self):
+        self.db_location = config.event_db
+
+    def create_connection(self):
+        conn = None
+        try:
+            conn = sqlite3.connect(self.db_location)
+        except Error as e:
+            print(e)
+
+        return conn
+
+    def create_table(self):
+        conn = self.create_connection()
+        sql = "CREATE TABLE IF NOT EXISTS events (date_time datetime PRIMARY KEY)"
+        try:
+            c = conn.cursor()
+            c.execute(sql)
+        except Error as e:
+            print(e)
+        conn.close()
+
+    def insert_event(self):
+        conn = self.create_connection()
+        sql = ''' INSERT INTO events(date_time)
+                  VALUES(datetime('now')) '''
+        cur = conn.cursor()
+        cur.execute(sql)
+        conn.close()

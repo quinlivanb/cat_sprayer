@@ -4,10 +4,10 @@ from tflite_runtime.interpreter import Interpreter
 import numpy as np
 import cv2
 import config
-from utils import ImageWrangler, VariableFifo, SprayController, MockController
+from utils import ImageWrangler, VariableFifo, SprayController, MockController, SqlControl
 
 
-def main(controller, image_capture):
+def main(controller, image_capture, sql_interface):
 
     # initialize variable length fixed duration fifos
     variable_fifo = VariableFifo(initial_fps=config.expected_fps)
@@ -56,6 +56,9 @@ def main(controller, image_capture):
         if event_detected and not on_going_event:
             on_going_event = True
             cur_event_start = time.time()
+
+            # log event to SQL DB
+            sql_interface.insert_event()
 
             # launch tread to control sprayer without blocking video capture
             sprayer_thread = Thread(target=controller.spray_the_cat)
@@ -113,6 +116,9 @@ if __name__ == '__main__':
     else:
         hardware_controller = MockController()
 
+    # SQL interface
+    sql_interface = SqlControl()
+
     # load model from disc
     interpreter = Interpreter(model_path=config.model_loc)
     interpreter.allocate_tensors()
@@ -127,7 +133,7 @@ if __name__ == '__main__':
     opencv_capture = ImageWrangler((width, height), cam_number=0)
 
     try:
-        main(hardware_controller, opencv_capture)
+        main(hardware_controller, opencv_capture, sql_interface)
     except KeyboardInterrupt:
         # When everything done, release the capture and clean up the controller
         opencv_capture.tear_down()
