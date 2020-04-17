@@ -198,7 +198,7 @@ class SqlControl:
     def create_connection(self):
         conn = None
         try:
-            conn = sqlite3.connect(self.db_location)
+            conn = sqlite3.connect(self.db_location, isolation_level=None)
         except Error as e:
             print(e)
 
@@ -216,8 +216,7 @@ class SqlControl:
 
     def insert_event(self):
         conn = self.create_connection()
-        sql = ''' INSERT INTO events(date_time)
-                  VALUES(datetime('now')) '''
+        sql = "INSERT INTO events(date_time) VALUES(datetime('now', 'localtime'))"
         cur = conn.cursor()
         cur.execute(sql)
         conn.close()
