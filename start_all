@@ -1,5 +1,5 @@
 #!/bin/bash
 
-screen -S sprayer -d "source sprayer/bin/activate; . env_setup_prev; python cat_sprayer"
-screen -S api -d ". ../cat_board/api/start_backend"
-screen -S react_app -d "cd ../cat_board; npm start"
+screen -dm -S sprayer -c "source sprayer/bin/activate; . env_setup_prev; python cat_sprayer"
+screen -dm -S api -c ". ../cat_board/api/start_backend"
+screen -dm -S react_app -c "cd ../cat_board; npm start"
