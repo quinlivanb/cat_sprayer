@@ -9,8 +9,8 @@ show_vid = False
 # algorithm settings
 cat_index = 16                                  # logit index corresponding to cat class
 model_loc = 'model_files/detect.tflite'         # location of quantized tflite model
-min_conf_threshold = 0.25                       # confidence level threshold
-detection_ratio = 0.5                           # how ful detection buffer must be to trigger event
+min_conf_threshold = 0.65                       # confidence level threshold
+detection_ratio = 0.25                          # how ful detection buffer must be to trigger event
 
 # buffer setup
 if on_pi:
