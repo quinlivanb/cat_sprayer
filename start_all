@@ -1,6 +1,6 @@
 #!/bin/bash
 
-
+cd ~/PythonProjects/cat_sprayer/ || return
 screen -S sprayer -dm bash -c "source sprayer/bin/activate; . env_setup_priv; python cat_sprayer.py"
 screen -S api -dm bash -c "cd ../cat_board; . api/start_backend"
 screen -S react -dm bash -c "cd ../cat_board; npm start"
