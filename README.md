@@ -55,6 +55,6 @@ the hardware controller circuit. I could the pump was drawing a max of 1.5 amps 
 the water inlet of the pipe. In my prototype I'm controlling the motor with a Tip 120, this is controlled by pin 18
 of the raspberry. It's important to include a 'fly back' diode across the motor to protect the pi and a 1k resistor 
 on the pin controlling the Tip120. It's also a good idea to use a 10k tie-down resistor to ensure the pump is not 
-trigger during startup/shutdown of the pi.   
+triggered during startup/shutdown of the pi.   
 
 ![Current Testing](images/current_testing.jpeg)
