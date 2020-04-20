@@ -51,10 +51,10 @@ by the motor. When plugged into the wall the batter is trickle charged via a ver
 
 
 It was very important to test the current draw of the pump under full load so I could correctly spec out 
-the hardware controller circuit. I could the pump was drawing a max of 1.5 amps when there was a blockage at 
+the hardware controller circuit. I could see the pump was drawing a max of 1.5 amps when there was a blockage at 
 the water inlet of the pipe. In my prototype I'm controlling the motor with a Tip 120, this is controlled by pin 18
-of the raspberry. It's important to include a 'fly back' diode across the motor to protect the pi and a 1k resistor 
-on the pin controlling the Tip120. It's also a good idea to use a 10k tie-down resistor to ensure the pump is not 
+of the pi. It's important to include a 'fly back' diode across the motor to protect the pi and a 1k resistor 
+on the pin controlling the Tip 120. It's also a good idea to use a 10k tie-down resistor to ensure the pump is not 
 triggered during startup/shutdown of the pi.   
 
 ![Current Testing](images/current_testing.jpeg)
