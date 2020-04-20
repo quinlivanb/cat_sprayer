@@ -12,6 +12,10 @@ The content of this database is visualized through a React frontend, highlightin
 over time (we’ve seen significant improvements to date). The ML detection, SQL database, Flask API and React 
 application are all hosted on a single raspberry pi.
 
+The computer vision model used in the application is an Object Detection algorithm, I started with a tensorflow lite
+pre-trained quantized COCO SSD MobileNet v1 model, which is capable of classifying 90 common items, including cats.
+A quantized model was employed to maximize fps on the raspberry pi. 
+
 This repository contains all the code required to run the device and send video clips to your mobile device, 
 although this will require that you also setup an aws and Twilio account. 
 The Twilio API is used to send the message while s3 is used to store clips and 
