@@ -49,7 +49,7 @@ an integral water reservoir.
 
 The water pump used in this project is a simple 3.7V pump/motor combo salvaged from an electric plant mister, 
 I was also able to salvage the battery from this to act as a UPS and to provide the current required 
-by the motor. When plugged into the wall the batter is trickle charged via a very cheap charge controller.  
+by the motor. When plugged into the wall the battery is trickle charged via an inexpensive charge controller.  
 
 ![Water Pump](images/motor_salvage.jpeg)
 
@@ -59,6 +59,6 @@ the hardware controller circuit. I could see the pump was drawing a max of 1.5 a
 the water inlet of the pipe. In my prototype I'm controlling the motor with a Tip 120, this is controlled by pin 18
 of the pi. It's important to include a 'fly back' diode across the motor to protect the pi and a 1k resistor 
 on the pin controlling the Tip 120. It's also a good idea to use a 10k tie-down resistor to ensure the pump is not 
-triggered during startup/shutdown of the pi.   
+triggered during startup/shutdown of the pi. Circuit diagrams will be included soon!    
 
 ![Current Testing](images/current_testing.jpeg)
