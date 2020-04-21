@@ -35,10 +35,15 @@ def main(controller, image_capture, sql_interface):
         cur_fps = int(np.mean(fps_buffer))
 
         # Capture and pre_process latest available frame - also returns frame for display purposes
-        input_data, cur_frame = image_capture.collect_frame()
+        try:
+            input_data, cur_frame = image_capture.collect_frame()
+        except:
+            print('dropped frame')
+            continue
 
         # if we fail to capture a frame, skip the rest of the loop
         if cur_frame is None:
+            print('dropped frame due to None')
             continue
 
         # Run inference of processed frame
