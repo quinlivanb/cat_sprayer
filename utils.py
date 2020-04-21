@@ -96,6 +96,8 @@ class SendClip:
 
 class ImageWrangler:
     def __init__(self, input_dims, cam_number=config.cam_number):
+        cam = cv2.VideoCapture(cam_number)
+        cam.release()
         self.capture = cv2.VideoCapture(cam_number)
         self.capture.set(3, config.resolution[0])
         self.capture.set(4, config.resolution[1])

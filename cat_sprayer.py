@@ -37,10 +37,6 @@ def main(controller, image_capture, sql_interface):
         # Capture and pre_process latest available frame - also returns frame for display purposes
         input_data, cur_frame = image_capture.collect_frame()
 
-        if cur_frame is None:
-            print('passing null frame')
-            continue
-
         # Run inference of processed frame
         interpreter.set_tensor(input_details[0]['index'], input_data)
         interpreter.invoke()
