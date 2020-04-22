@@ -52,7 +52,7 @@ def main(controller, image_capture, sql_interface):
         # has the number of cat detections in the last n frames exceeded the detection ratio ratio?
         event_detected = sum(detection_buffer) / detection_buffer.maxlen > config.detection_ratio
 
-        # start new event unless one on-going
+        # start.sh new event unless one on-going
         if event_detected and not on_going_event:
             print('Event Detected')
             on_going_event = True

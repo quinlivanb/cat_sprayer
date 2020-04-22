@@ -28,7 +28,7 @@ class SprayController:
         GPIO.setup(target_pin, GPIO.OUT)
 
     def spray_the_cat(self):
-        # start the sprayer with 2 second long pause
+        # start.sh the sprayer with 2 second long pause
         GPIO.output(self.target_pin, GPIO.HIGH)
         # spray the cat for 3 seconds
         time.sleep(self.spray_duration)

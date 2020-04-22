@@ -52,7 +52,7 @@ cam_warm_up = 2                                 # time (seconds) for camera sens
 video_out = 'video_out/cat_clip_'               # where to store latest event video
 codec = cv2.VideoWriter_fourcc(*'mp4v')         # video codec used by cv2
 clip_ext = '.mp4'                               # base name for all video files
-event_lead = -2                                 # when should clip start, relative to event detection
+event_lead = -2                                 # when should clip start.sh, relative to event detection
 content_type = 'video/mp4'                      # url content type
 
 
